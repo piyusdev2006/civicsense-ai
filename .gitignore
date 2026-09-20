@@ -39,3 +39,11 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Local documentation (kept on local machine only)
+ARCHITECTURE.md
+DEPLOYMENT.md
+FLOW_DIAGRAM.md
+TEST_CASES.md
+docs-local/
+
