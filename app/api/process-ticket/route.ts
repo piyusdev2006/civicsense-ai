@@ -6,12 +6,12 @@ import { DynamoDBClient, PutItemCommand } from "@aws-sdk/client-dynamodb";
 import { v4 as uuidv4 } from "uuid";
 import { logToCloudWatch } from "@/app/lib/cloudwatch";
 
-// AWS CONFIGURATION
+// AWS CONFIGURATION (Supports standard AWS_ and Amplify-friendly APP_AWS_ prefixes)
 const awsConfig = {
-  region: process.env.AWS_REGION || "us-east-1",
+  region: process.env.APP_AWS_REGION || process.env.AWS_REGION || "us-east-1",
   credentials: {
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID || "DUMMY",
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || "DUMMY",
+    accessKeyId: process.env.APP_AWS_ACCESS_KEY_ID || process.env.AWS_ACCESS_KEY_ID || "DUMMY",
+    secretAccessKey: process.env.APP_AWS_SECRET_ACCESS_KEY || process.env.AWS_SECRET_ACCESS_KEY || "DUMMY",
   },
 };
 

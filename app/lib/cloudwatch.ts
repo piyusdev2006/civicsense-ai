@@ -3,10 +3,10 @@ import { CloudWatchLogsClient, CreateLogGroupCommand, CreateLogStreamCommand, Pu
 const LOG_GROUP = "/civicsense-ai/tickets";
 
 const cwClient = new CloudWatchLogsClient({
-  region: process.env.AWS_REGION || "us-east-1",
+  region: process.env.APP_AWS_REGION || process.env.AWS_REGION || "us-east-1",
   credentials: {
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID || "DUMMY",
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || "DUMMY",
+    accessKeyId: process.env.APP_AWS_ACCESS_KEY_ID || process.env.AWS_ACCESS_KEY_ID || "DUMMY",
+    secretAccessKey: process.env.APP_AWS_SECRET_ACCESS_KEY || process.env.AWS_SECRET_ACCESS_KEY || "DUMMY",
   },
 });
 
