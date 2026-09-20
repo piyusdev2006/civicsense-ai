@@ -4,7 +4,7 @@ import { RekognitionClient, DetectLabelsCommand } from "@aws-sdk/client-rekognit
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { DynamoDBClient, PutItemCommand } from "@aws-sdk/client-dynamodb";
 import { v4 as uuidv4 } from "uuid";
-import { logToCloudWatch } from "@/app/lib/cloudwatch";
+import { logToCloudWatch } from "../../lib/cloudwatch";
 
 // AWS CONFIGURATION (Supports standard AWS_ and Amplify-friendly APP_AWS_ prefixes)
 const awsConfig = {
