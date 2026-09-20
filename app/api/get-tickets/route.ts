@@ -12,13 +12,15 @@ export async function GET() {
   }
 
   try {
-    const dynamoClient = new DynamoDBClient({
-      region: process.env.APP_AWS_REGION || process.env.AWS_REGION || "us-east-1",
-      credentials: {
-        accessKeyId: process.env.APP_AWS_ACCESS_KEY_ID || process.env.AWS_ACCESS_KEY_ID || "DUMMY",
-        secretAccessKey: process.env.APP_AWS_SECRET_ACCESS_KEY || process.env.AWS_SECRET_ACCESS_KEY || "DUMMY",
-      },
-    });
+    const region = process.env.APP_AWS_REGION || process.env.AWS_REGION || "us-east-1";
+    const accessKeyId = process.env.APP_AWS_ACCESS_KEY_ID || process.env.AWS_ACCESS_KEY_ID;
+    const secretAccessKey = process.env.APP_AWS_SECRET_ACCESS_KEY || process.env.AWS_SECRET_ACCESS_KEY;
+
+    const dynamoConfig = accessKeyId && secretAccessKey
+      ? { region, credentials: { accessKeyId, secretAccessKey } }
+      : { region };
+
+    const dynamoClient = new DynamoDBClient(dynamoConfig);
 
     const data = await dynamoClient.send(new ScanCommand({ TableName: process.env.DYNAMODB_TABLE_NAME || "CivicTickets" }));
     const tickets = (data.Items || []).map(item => ({

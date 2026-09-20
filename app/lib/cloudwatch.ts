@@ -2,26 +2,30 @@ import { CloudWatchLogsClient, CreateLogGroupCommand, CreateLogStreamCommand, Pu
 
 const LOG_GROUP = "/civicsense-ai/tickets";
 
-const cwClient = new CloudWatchLogsClient({
-  region: process.env.APP_AWS_REGION || process.env.AWS_REGION || "us-east-1",
-  credentials: {
-    accessKeyId: process.env.APP_AWS_ACCESS_KEY_ID || process.env.AWS_ACCESS_KEY_ID || "DUMMY",
-    secretAccessKey: process.env.APP_AWS_SECRET_ACCESS_KEY || process.env.AWS_SECRET_ACCESS_KEY || "DUMMY",
-  },
-});
+function getCwClient() {
+  const region = process.env.APP_AWS_REGION || process.env.AWS_REGION || "us-east-1";
+  const accessKeyId = process.env.APP_AWS_ACCESS_KEY_ID || process.env.AWS_ACCESS_KEY_ID;
+  const secretAccessKey = process.env.APP_AWS_SECRET_ACCESS_KEY || process.env.AWS_SECRET_ACCESS_KEY;
+
+  if (accessKeyId && secretAccessKey) {
+    return new CloudWatchLogsClient({ region, credentials: { accessKeyId, secretAccessKey } });
+  }
+  return new CloudWatchLogsClient({ region });
+}
 
 let logGroupReady = false;
 const LOG_STREAM = `stream-${Date.now()}`;
 
 async function ensureLogGroup() {
   if (logGroupReady) return;
+  const client = getCwClient();
   try {
-    await cwClient.send(new CreateLogGroupCommand({ logGroupName: LOG_GROUP }));
+    await client.send(new CreateLogGroupCommand({ logGroupName: LOG_GROUP }));
   } catch (e: any) {
     if (e.name !== "ResourceAlreadyExistsException") console.warn("CW LogGroup:", e.message);
   }
   try {
-    await cwClient.send(new CreateLogStreamCommand({ logGroupName: LOG_GROUP, logStreamName: LOG_STREAM }));
+    await client.send(new CreateLogStreamCommand({ logGroupName: LOG_GROUP, logStreamName: LOG_STREAM }));
   } catch (e: any) {
     if (e.name !== "ResourceAlreadyExistsException") console.warn("CW LogStream:", e.message);
   }
@@ -33,7 +37,8 @@ export async function logToCloudWatch(ticketId: string, event: string, details: 
 
   try {
     await ensureLogGroup();
-    await cwClient.send(new PutLogEventsCommand({
+    const client = getCwClient();
+    await client.send(new PutLogEventsCommand({
       logGroupName: LOG_GROUP,
       logStreamName: LOG_STREAM,
       logEvents: [{

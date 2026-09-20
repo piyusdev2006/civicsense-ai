@@ -7,19 +7,26 @@ import { v4 as uuidv4 } from "uuid";
 import { logToCloudWatch } from "../../lib/cloudwatch";
 
 // AWS CONFIGURATION (Supports standard AWS_ and Amplify-friendly APP_AWS_ prefixes)
-const awsConfig = {
-  region: process.env.APP_AWS_REGION || process.env.AWS_REGION || "us-east-1",
-  credentials: {
-    accessKeyId: process.env.APP_AWS_ACCESS_KEY_ID || process.env.AWS_ACCESS_KEY_ID || "DUMMY",
-    secretAccessKey: process.env.APP_AWS_SECRET_ACCESS_KEY || process.env.AWS_SECRET_ACCESS_KEY || "DUMMY",
-  },
-};
+function getAwsConfig() {
+  const region = process.env.APP_AWS_REGION || process.env.AWS_REGION || "us-east-1";
+  const accessKeyId = process.env.APP_AWS_ACCESS_KEY_ID || process.env.AWS_ACCESS_KEY_ID;
+  const secretAccessKey = process.env.APP_AWS_SECRET_ACCESS_KEY || process.env.AWS_SECRET_ACCESS_KEY;
+
+  if (accessKeyId && secretAccessKey) {
+    return {
+      region,
+      credentials: { accessKeyId, secretAccessKey },
+    };
+  }
+  return { region };
+}
 
 // ============================================================
 // HELPER: Upload image to AWS S3
 // ============================================================
 async function uploadToS3(imageBase64: string, ticketId: string) {
-  const s3Client = new S3Client(awsConfig);
+  const config = getAwsConfig();
+  const s3Client = new S3Client(config);
   const imageBuffer = Buffer.from(imageBase64, "base64");
   const s3Key = `tickets/${ticketId}.jpg`;
 
@@ -30,14 +37,14 @@ async function uploadToS3(imageBase64: string, ticketId: string) {
     ContentType: "image/jpeg",
   }));
 
-  return `https://${process.env.S3_BUCKET_NAME}.s3.${awsConfig.region}.amazonaws.com/${s3Key}`;
+  return `https://${process.env.S3_BUCKET_NAME}.s3.${config.region}.amazonaws.com/${s3Key}`;
 }
 
 // ============================================================
 // AI LAYER 1: Amazon Bedrock (Primary - when quota available)
 // ============================================================
 async function analyzeWithBedrock(imageBase64: string, description: string) {
-  const bedrockClient = new BedrockRuntimeClient(awsConfig);
+  const bedrockClient = new BedrockRuntimeClient(getAwsConfig());
   const bedrockPrompt = `You are an expert municipal grievance AI for Indian cities.
 Analyze this civic issue image and description: "${description}".
 Respond in STRICT JSON (no markdown) with: "category", "urgency" (High/Medium/Low), "department", "summary".`;
@@ -66,7 +73,7 @@ Respond in STRICT JSON (no markdown) with: "category", "urgency" (High/Medium/Lo
 // AI LAYER 2: Amazon Rekognition (Image AI - separate quota)
 // ============================================================
 async function analyzeWithRekognition(imageBase64: string, description: string) {
-  const rekClient = new RekognitionClient(awsConfig);
+  const rekClient = new RekognitionClient(getAwsConfig());
   const imageBuffer = Buffer.from(imageBase64, "base64");
 
   const response = await rekClient.send(new DetectLabelsCommand({
@@ -147,7 +154,7 @@ function smartFallbackAnalysis(description: string) {
 // HELPER: Save ticket to DynamoDB
 // ============================================================
 async function saveToDynamoDB(ticket: any) {
-  const dynamoClient = new DynamoDBClient(awsConfig);
+  const dynamoClient = new DynamoDBClient(getAwsConfig());
   await dynamoClient.send(new PutItemCommand({
     TableName: process.env.DYNAMODB_TABLE_NAME || "CivicTickets",
     Item: {
