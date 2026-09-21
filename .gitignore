@@ -1,6 +1,6 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
-# dependencies
+# ── Dependencies ──────────────────────────────────────────────────
 /node_modules
 /.pnp
 .pnp.*
@@ -10,40 +10,52 @@
 !.yarn/releases
 !.yarn/versions
 
-# testing
-/coverage
-
-# next.js
+# ── Next.js Build Output ──────────────────────────────────────────
 /.next/
 /out/
-
-# production
 /build
 
-# misc
-.DS_Store
-*.pem
+# ── Environment & Secrets ─────────────────────────────────────────
+.env*
 
-# debug
+# ── AWS Setup & Test Scripts (local dev only) ─────────────────────
+aws_setup.mjs
+run_tests.mjs
+test_bedrock.mjs
+
+# ── TypeScript Generated ──────────────────────────────────────────
+*.tsbuildinfo
+next-env.d.ts
+
+# ── Debug Logs ────────────────────────────────────────────────────
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
+/coverage
 
-# env files (can opt-in for committing if needed)
-.env*
+# ── OS & Editor ───────────────────────────────────────────────────
+.DS_Store
+*.pem
+Thumbs.db
+.vscode/
+.idea/
 
-# vercel
+# ── Deployment Platform ───────────────────────────────────────────
 .vercel
+.amplify/
 
-# typescript
-*.tsbuildinfo
-next-env.d.ts
+# ── Default Next.js Placeholder Assets (not needed) ───────────────
+public/file.svg
+public/globe.svg
+public/next.svg
+public/vercel.svg
+public/window.svg
 
-# Local documentation (kept on local machine only)
+# ── Local Documentation (personal use only, not for GitHub) ───────
 ARCHITECTURE.md
 DEPLOYMENT.md
 FLOW_DIAGRAM.md
 TEST_CASES.md
+MEDIUM_FINAL.md
 docs-local/
-
